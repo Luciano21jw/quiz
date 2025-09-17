@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Quiz Interativo</title>
+<title>Quiz Interativo — Tenses</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 /* Estilo geral */
@@ -21,7 +21,7 @@ body {
 /* Container do quiz */
 .quiz-container {
   width: 95%;
-  max-width: 500px;
+  max-width: 700px;
   background: #fff;
   color: #333;
   border-radius: 20px;
@@ -34,79 +34,80 @@ body {
 
 /* Pergunta */
 .question {
-  font-size: 1.6em;
-  margin-bottom: 20px;
+  font-size: 1.4em;
+  margin-bottom: 16px;
 }
 
 /* Botões de opções */
 .options button {
   display: block;
   width: 100%;
-  margin: 10px 0;
-  padding: 16px;
-  font-size: 1.2em;
+  margin: 8px 0;
+  padding: 14px;
+  font-size: 1.05em;
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.18s;
   background: #4a90e2;
   color: #fff;
-  font-weight: bold;
+  font-weight: 700;
+  text-align: left;
 }
-.options button:hover {
-  transform: scale(1.05);
-}
+.options button:hover { transform: translateY(-2px); }
 .options button.correct { background: #4CAF50 !important; }
 .options button.incorrect { background: #F44336 !important; }
 
 /* Botão enviar */
 .next-btn {
-  margin-top: 15px;
-  padding: 16px;
-  font-size: 1.2em;
+  margin-top: 14px;
+  padding: 14px;
+  font-size: 1.05em;
   width: 100%;
   border-radius: 12px;
   border: none;
   background: #ff7f50;
   color: #fff;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
 }
-.next-btn:hover { background: #ff5722; transform: scale(1.03); }
+.next-btn:hover { background: #ff5722; transform: translateY(-2px); }
 
 /* Resultados */
 .result {
-  font-size: 1.4em;
-  margin-top: 20px;
+  font-size: 1.2em;
+  margin-top: 18px;
 }
 .answer-review {
-  margin-top: 15px;
-  font-size: 1em;
+  margin-top: 14px;
+  font-size: 0.98em;
   text-align: left;
 }
-.correct-answer { color: green; font-weight: bold; }
-.wrong-answer { color: red; font-weight: bold; }
+.answer-review div { margin-bottom: 12px; }
+.correct-answer { color: green; font-weight: 700; }
+.wrong-answer { color: red; font-weight: 700; }
 
 /* Input nome */
 #participantName {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   font-size: 1em;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #ccc;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   box-sizing: border-box;
 }
 
 /* Timer */
 #timer {
-  font-size: 1.2em;
+  font-size: 1.05em;
   font-weight: bold;
   color: #d9534f;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  text-align: right;
 }
 
-/* Overlay de carregamento */
+/* Loading overlay */
 .loading-overlay {
   position: absolute;
   top:0; left:0;
@@ -115,7 +116,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5em;
+  font-size: 1.2em;
   color: #333;
   border-radius: 20px;
   z-index: 1000;
@@ -123,31 +124,49 @@ body {
 }
 
 /* Responsividade */
-@media (max-width: 400px) {
-  .question { font-size: 1.4em; }
-  .options button, .next-btn { font-size: 1em; padding: 14px; }
-  #participantName { padding: 12px; }
+@media (max-width: 420px) {
+  .quiz-container { padding: 16px; }
+  .question { font-size: 1.2em; }
+  .options button { font-size: 1em; padding: 12px; }
+  .next-btn { padding: 12px; font-size: 1em; }
 }
 </style>
+
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
-<div class="quiz-container">
+<div class="quiz-container" id="container">
   <div id="quiz"></div>
-  <div id="loading" class="loading-overlay">Carregando próxima questão...</div>
+  <div id="loading" class="loading-overlay">Enviando / carregando...</div>
 </div>
 
 <script>
-const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
+/* === CONFIG === */
+/* URL do Apps Script (cole sua URL aqui) */
 const scriptURL = "https://script.google.com/macros/s/AKfycbyiPSe_-TnyHWy0LXtJSde3RzW2cosX6UiILq6TfDDiFTg_xTVLqKPXvtyMVQdG3wSA/exec";
+/* Link de vencedor (opcional) */
+const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
 
-let questions = [
-  { question: "Qual é a capital do Brasil?", options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"], answer: 2 },
-  { question: "Qual é 2 + 2?", options: ["3", "4", "5", "6"], answer: 2 },
-  { question: "Qual é a cor do céu em um dia limpo?", options: ["Azul", "Verde", "Vermelho", "Amarelo"], answer: 1 }
+/* === Perguntas inseridas conforme você pediu ===
+Format: { question: "...", options: [...4...], answer: index (1-based) }
+*/
+const questions = [
+  { question: 'In the sentence “I study Portuguese every day”, what tense is the verb in?', options: ['Past','Present','Future','Conditional'], answer: 2 },
+  { question: 'In the sentence “She will study tomorrow”, what tense is the verb in?', options: ['Past','Present','Future','Infinitive'], answer: 3 },
+  { question: 'In the sentence “We studied yesterday”, what tense is the verb in?', options: ['Present','Infinitive','Future','Past'], answer: 4 },
+  { question: 'What is the future form of “to travel” in the 1st person singular?', options: ['I traveled','I travel','I will travel','I would travel'], answer: 3 },
+  { question: 'What is the past (simple past) of “to go” in the 3rd person singular?', options: ['He goes','He will go','He was going','He went'], answer: 4 },
+  { question: 'What is the present form of “to work” in the 3rd person plural?', options: ['They worked','They work','They will work','Working'], answer: 2 },
+  { question: 'Which option is in the future tense?', options: ['We were singing','We will sing','We sing','We sang'], answer: 2 },
+  { question: 'The form “I used to live” indicates which tense?', options: ['Present','Past','Future','Imperative'], answer: 2 },
+  { question: 'Which sentence is in the present tense?', options: ['They will eat now','They ate now','They were eating now','They eat now'], answer: 4 },
+  { question: 'Complete: “Tomorrow we ______ early.” (verb “wake up”)', options: ['We wake up','We will wake up','We woke up','Wakes up'], answer: 2 },
+  { question: 'Which sentence is in the past tense?', options: ['I write a letter','I will write a letter','I wrote a letter','I would write a letter'], answer: 3 },
+  { question: 'The verb “I will do” is in which tense?', options: ['Past','Present','Future','Conditional'], answer: 3 }
 ];
 
+/* State */
 let current = 0;
 let score = 0;
 let answered = false;
@@ -155,120 +174,167 @@ let userAnswers = [];
 let timer;
 let timeLeft = 30;
 
+/* Helpers */
+function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
+
+/* Timer */
 function startTimer() {
   clearInterval(timer);
   timeLeft = 30;
-  document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
+  const t = document.getElementById("timer");
+  if (t) t.textContent = "⏳ Tempo: " + timeLeft + "s";
   timer = setInterval(() => {
     timeLeft--;
-    document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
+    const t2 = document.getElementById("timer");
+    if (t2) t2.textContent = "⏳ Tempo: " + timeLeft + "s";
     if (timeLeft <= 0) {
       clearInterval(timer);
-      userAnswers.push(0);
+      userAnswers.push(0); // não respondeu
       nextQuestion();
     }
   }, 1000);
 }
 
-function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
-
+/* Render question */
 function showQuestion() {
   answered = false;
   const q = questions[current];
-  const formattedQuestion = formatBoldQuotes(q.question);
+  const formatted = formatBoldQuotes(q.question);
   let html = `<div id="timer">⏳ Tempo: 30s</div>`;
-  html += `<div class="question">${current+1}. ${formattedQuestion}</div><div class="options">`;
-  q.options.forEach((opt, i) => { html += `<button onclick="clickOption(${i+1})">${opt}</button>`; });
-  html += '</div>';
-  document.getElementById('quiz').innerHTML = html;
+  html += `<div class="question">${current+1}. ${formatted}</div><div class="options">`;
+  q.options.forEach((opt, i) => {
+    html += `<button onclick="clickOption(${i+1})">${opt}</button>`;
+  });
+  html += `</div>`;
+  document.getElementById("quiz").innerHTML = html;
   startTimer();
 }
 
+/* Click option */
 function clickOption(selected) {
-  const loading = document.getElementById('loading');
-  loading.style.display = 'flex';
+  if (answered) return;
+  // show loading briefly
+  const loading = document.getElementById("loading");
+  loading.style.display = "flex";
   setTimeout(() => {
-    loading.style.display = 'none';
+    loading.style.display = "none";
     checkAnswer(selected);
-  }, 500);
+  }, 250);
 }
 
+/* Check answer */
 function checkAnswer(selected) {
-  if(answered) return;
+  if (answered) return;
   answered = true;
   clearInterval(timer);
   const correct = questions[current].answer;
-  const buttons = document.querySelectorAll('.options button');
+  const buttons = document.querySelectorAll(".options button");
   buttons.forEach((b, i) => {
-    if (i+1 == correct) b.classList.add('correct');
-    else if (i+1 == selected) b.classList.add('incorrect');
+    if (i+1 === correct) b.classList.add("correct");
+    else if (i+1 === selected) b.classList.add("incorrect");
     b.disabled = true;
   });
   userAnswers.push(selected);
-  if (selected == correct) { score++; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
-  setTimeout(nextQuestion, 800);
+  if (selected === correct) {
+    score++;
+    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+  }
+  setTimeout(nextQuestion, 700);
 }
 
+/* Next question */
 function nextQuestion() {
   current++;
-  if(current < questions.length) showQuestion();
+  if (current < questions.length) showQuestion();
   else showResult();
 }
 
+/* Show results and form to send */
 function showResult() {
   let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score} / ${questions.length}</div>`;
   html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
-  questions.forEach((q,i)=>{
-    const userAns = q.options[userAnswers[i]-1] || 'Não respondida';
-    const correctAns = q.options[q.answer-1];
-    const formattedQuestion = formatBoldQuotes(q.question);
-    html += `<div><strong>Pergunta ${i+1}:</strong> ${formattedQuestion}<br> Sua resposta: <span class="${userAnswers[i]===q.answer ? 'correct-answer' : 'wrong-answer'}">${userAns}</span><br> Resposta correta: <span class="correct-answer">${correctAns}</span></div>`;
+  questions.forEach((q,i) => {
+    const userAnsText = q.options[(userAnswers[i]||0)-1] || 'Não respondida';
+    const correctText = q.options[q.answer-1];
+    const cls = (userAnswers[i] === q.answer) ? 'correct-answer' : 'wrong-answer';
+    html += `<div><strong>Pergunta ${i+1}:</strong> ${formatBoldQuotes(q.question)}<br>
+      Sua resposta: <span class="${cls}">${userAnsText}</span><br>
+      Resposta correta: <span class="correct-answer">${correctText}</span></div>`;
   });
   html += `</div>`;
-  html += `<div style="text-align:center; margin-top:20px;">
-    <input type="text" id="participantName" placeholder="Digite seu nome"><br>
-    <button class="next-btn" onclick="sendResults()">ENVIAR RESPOSTAS</button>
-    <p id="statusMsg"></p>
-  </div>`;
-  document.getElementById('quiz').innerHTML = html;
 
-  const winner = (score >= 2) ? true : false;
-  const resultDiv = document.createElement('div');
-  resultDiv.id = 'winner';
-  if(winner){
-    resultDiv.innerHTML = `🏆 Parabéns, você ganhou!<br>Visite: <a href="${shopeeLink}" target="_blank">Shopee</a>`;
-    document.getElementById('quiz').appendChild(resultDiv);
-    confetti({ particleCount: 200, spread: 100 });
+  html += `<div style="text-align:center; margin-top:16px;">
+    <input type="text" id="participantName" placeholder="Digite seu nome" /><br>
+    <button class="next-btn" id="sendBtn" onclick="sendResults()">ENVIAR RESPOSTAS</button>
+    <p id="statusMsg" style="margin-top:10px"></p>
+  </div>`;
+
+  document.getElementById("quiz").innerHTML = html;
+
+  // Winner badge
+  const winner = (score >= Math.ceil(questions.length * 0.5)); // >=50% considered winner
+  const resultDiv = document.createElement("div");
+  resultDiv.id = "winner";
+  resultDiv.style.marginTop = "12px";
+  if (winner) {
+    resultDiv.innerHTML = `🏆 <strong>Você se saiu bem!</strong><br><a href="${shopeeLink}" target="_blank">Confira uma oferta especial</a>`;
+    document.getElementById("quiz").appendChild(resultDiv);
   } else {
-    resultDiv.innerHTML = `😢 Continue tentando!`;
-    document.getElementById('quiz').appendChild(resultDiv);
+    resultDiv.innerHTML = `🙂 Continue praticando!`;
+    document.getElementById("quiz").appendChild(resultDiv);
   }
 }
 
+/* Send results to Apps Script (saves to Google Sheets) */
 function sendResults() {
-  const name = document.getElementById("participantName").value || "Anônimo";
-  const data = {
-    nome: name,
-    pontuacao: score,
-    respostas: userAnswers.join(", "),
-    totalQuestoes: questions.length
+  const sendBtn = document.getElementById("sendBtn");
+  const loading = document.getElementById("loading");
+  const statusMsg = document.getElementById("statusMsg");
+  const name = (document.getElementById("participantName") && document.getElementById("participantName").value.trim()) || "Anônimo";
+
+  // prepare answers as text
+  const answersPayload = questions.map((q,i) => ({
+    question: q.question,
+    selected: q.options[(userAnswers[i]||0)-1] || "Não respondida",
+    correct: q.options[q.answer-1]
+  }));
+
+  const payload = {
+    name: name,
+    score: score,
+    total: questions.length,
+    answers: answersPayload
   };
 
+  // UI feedback
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Enviando...";
+  loading.style.display = "flex";
+  statusMsg.textContent = "";
+
+  // Use no-cors so the browser doesn't block POST; Apps Script will still receive it.
   fetch(scriptURL, {
     method: "POST",
-    body: JSON.stringify(data),
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    mode: "no-cors"
   })
-  .then(res => res.json())
-  .then(res => {
-    document.getElementById("statusMsg").innerText = "✅ Respostas enviadas com sucesso!";
+  .then(() => {
+    // with no-cors we can't read server response; assume success
+    loading.style.display = "none";
+    sendBtn.textContent = "Enviado";
+    statusMsg.textContent = "✅ Respostas enviadas! Verifique a planilha.";
   })
   .catch(err => {
-    document.getElementById("statusMsg").innerText = "❌ Erro ao enviar respostas.";
-    console.error(err);
+    loading.style.display = "none";
+    sendBtn.disabled = false;
+    sendBtn.textContent = "ENVIAR RESPOSTAS";
+    statusMsg.textContent = "❌ Erro ao enviar. Veja console.";
+    console.error("Send error:", err);
   });
 }
 
+/* Start */
 showQuestion();
 </script>
 
