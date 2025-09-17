@@ -5,7 +5,6 @@
 <title>Quiz Interativo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-/* Estilo geral */
 body {
   font-family: 'Segoe UI', Roboto, sans-serif;
   margin: 0;
@@ -18,7 +17,6 @@ body {
   min-height: 100vh;
 }
 
-/* Container do quiz */
 .quiz-container {
   width: 95%;
   max-width: 500px;
@@ -32,13 +30,7 @@ body {
   position: relative;
 }
 
-/* Pergunta */
-.question {
-  font-size: 1.6em;
-  margin-bottom: 20px;
-}
-
-/* Botões de opções */
+.question { font-size: 1.6em; margin-bottom: 20px; }
 .options button {
   display: block;
   width: 100%;
@@ -53,13 +45,10 @@ body {
   color: #fff;
   font-weight: bold;
 }
-.options button:hover {
-  transform: scale(1.05);
-}
+.options button:hover { transform: scale(1.05); }
 .options button.correct { background: #4CAF50 !important; }
 .options button.incorrect { background: #F44336 !important; }
 
-/* Botão enviar */
 .next-btn {
   margin-top: 15px;
   padding: 16px;
@@ -74,55 +63,15 @@ body {
 }
 .next-btn:hover { background: #ff5722; transform: scale(1.03); }
 
-/* Resultados */
-.result {
-  font-size: 1.4em;
-  margin-top: 20px;
-}
-.answer-review {
-  margin-top: 15px;
-  font-size: 1em;
-  text-align: left;
-}
+.result { font-size: 1.4em; margin-top: 20px; }
+.answer-review { margin-top: 15px; font-size: 1em; text-align: left; }
 .correct-answer { color: green; font-weight: bold; }
 .wrong-answer { color: red; font-weight: bold; }
 
-/* Input nome */
-#participantName {
-  width: 100%;
-  padding: 14px;
-  font-size: 1em;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  margin-bottom: 15px;
-  box-sizing: border-box;
-}
+#participantName { width: 100%; padding: 14px; font-size: 1em; border-radius: 12px; border: 1px solid #ccc; margin-bottom: 15px; box-sizing: border-box; }
+#timer { font-size: 1.2em; font-weight: bold; color: #d9534f; margin-bottom: 15px; }
+.loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; font-size: 1.5em; color: #333; border-radius: 20px; z-index: 1000; display: none; }
 
-/* Timer */
-#timer {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #d9534f;
-  margin-bottom: 15px;
-}
-
-/* Overlay de carregamento */
-.loading-overlay {
-  position: absolute;
-  top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(255,255,255,0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5em;
-  color: #333;
-  border-radius: 20px;
-  z-index: 1000;
-  display: none;
-}
-
-/* Responsividade */
 @media (max-width: 400px) {
   .question { font-size: 1.4em; }
   .options button, .next-btn { font-size: 1em; padding: 14px; }
@@ -141,6 +90,7 @@ body {
 <script>
 const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
 
+// Perguntas do quiz
 let questions = [
   { question: "Qual é a capital do Brasil?", options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"], answer: 2 },
   { question: "Qual é 2 + 2?", options: ["3", "4", "5", "6"], answer: 2 },
@@ -154,6 +104,7 @@ let userAnswers = [];
 let timer;
 let timeLeft = 30;
 
+// Timer
 function startTimer() {
   clearInterval(timer);
   timeLeft = 30;
@@ -161,16 +112,14 @@ function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
     document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      userAnswers.push(0);
-      nextQuestion();
-    }
+    if (timeLeft <= 0) { clearInterval(timer); userAnswers.push(0); nextQuestion(); }
   }, 1000);
 }
 
+// Formatar texto com aspas em negrito
 function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
 
+// Mostrar pergunta
 function showQuestion() {
   answered = false;
   const q = questions[current];
@@ -183,15 +132,14 @@ function showQuestion() {
   startTimer();
 }
 
+// Clicar em opção
 function clickOption(selected) {
   const loading = document.getElementById('loading');
   loading.style.display = 'flex';
-  setTimeout(() => {
-    loading.style.display = 'none';
-    checkAnswer(selected);
-  }, 500);
+  setTimeout(() => { loading.style.display = 'none'; checkAnswer(selected); }, 500);
 }
 
+// Checar resposta
 function checkAnswer(selected) {
   if(answered) return;
   answered = true;
@@ -208,12 +156,14 @@ function checkAnswer(selected) {
   setTimeout(nextQuestion, 800);
 }
 
+// Próxima pergunta
 function nextQuestion() {
   current++;
   if(current < questions.length) showQuestion();
   else showResult();
 }
 
+// Mostrar resultado
 function showResult() {
   let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score} / ${questions.length}</div>`;
   html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
@@ -226,11 +176,11 @@ function showResult() {
   html += `</div>`;
   html += `<div style="text-align:center; margin-top:20px;">
     <input type="text" id="participantName" placeholder="Digite seu nome"><br>
-    <button class="next-btn" onclick="alert('Respostas enviadas!')">ENVIAR RESPOSTAS</button>
+    <button class="next-btn" onclick="sendResults()">ENVIAR RESPOSTAS</button>
   </div>`;
   document.getElementById('quiz').innerHTML = html;
 
-  const winner = (score >= 2) ? true : false;
+  const winner = (score >= 2);
   const resultDiv = document.createElement('div');
   resultDiv.id = 'winner';
   if(winner){
@@ -243,6 +193,33 @@ function showResult() {
   }
 }
 
+// Enviar respostas via Google Apps Script
+function sendResults() {
+  const participantName = document.getElementById('participantName').value.trim();
+  if(!participantName){ alert("Digite seu nome antes de enviar."); return; }
+
+  const payload = {
+    name: participantName,
+    score: score,
+    total: questions.length,
+    answers: userAnswers.map((a,i)=>({
+      question: questions[i].question,
+      selected: questions[i].options[a-1],
+      correct: questions[i].options[questions[i].answer-1]
+    }))
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbwq3jBaHFNuZ8vL9nVxaGtHpM4b7MRseroDiv68lIGU9kdFJmUNjVOJhGLoZRz35AZX/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => alert("Respostas enviadas!"))
+  .catch(err => alert("Erro ao enviar respostas: " + err));
+}
+
+// Iniciar quiz
 showQuestion();
 </script>
 
