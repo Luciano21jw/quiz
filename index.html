@@ -3,64 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <title>Quiz Interativo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+/* Estilo geral */
 body {
   font-family: 'Segoe UI', Roboto, sans-serif;
-  background: #f0f2f5;
   margin: 0;
-  padding: 20px;
-  font-size: 20px;
+  padding: 0;
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
+
+/* Container do quiz */
 .quiz-container {
-  max-width: 700px;
-  margin: auto;
+  width: 95%;
+  max-width: 500px;
   background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  color: #333;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
   position: relative;
 }
+
+/* Pergunta */
 .question {
-  font-size: 2em;
+  font-size: 1.6em;
   margin-bottom: 20px;
 }
+
+/* Botões de opções */
 .options button {
   display: block;
   width: 100%;
-  text-align: left;
-  background: #e0e0e0;
-  border: none;
   margin: 10px 0;
   padding: 16px;
-  border-radius: 8px;
   font-size: 1.2em;
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
+  background: #4a90e2;
+  color: #fff;
+  font-weight: bold;
 }
-.options button.correct { background: #4CAF50 !important; color: white; }
-.options button.incorrect { background: #F44336 !important; color: white; }
+.options button:hover {
+  transform: scale(1.05);
+}
+.options button.correct { background: #4CAF50 !important; }
+.options button.incorrect { background: #F44336 !important; }
+
+/* Botão enviar */
 .next-btn {
   margin-top: 15px;
-  padding: 12px 24px;
+  padding: 16px;
+  font-size: 1.2em;
+  width: 100%;
+  border-radius: 12px;
   border: none;
-  border-radius: 8px;
-  background: #2196F3;
-  color: white;
+  background: #ff7f50;
+  color: #fff;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 1.1em;
 }
+.next-btn:hover { background: #ff5722; transform: scale(1.03); }
+
+/* Resultados */
 .result {
-  font-size: 1.6em;
-  text-align: center;
-  margin-top: 30px;
+  font-size: 1.4em;
+  margin-top: 20px;
 }
-.answer-review { margin-top: 20px; font-size: 1.2em; }
-.answer-review div { margin-bottom: 15px; }
-.correct-answer { color: green; }
-.wrong-answer { color: red; }
-#winner { font-size: 2em; text-align: center; margin-top: 20px; }
-#participantName { width: 100%; padding: 12px; margin-bottom: 20px; font-size: 1.1em; border-radius: 8px; border: 1px solid #ccc; }
-#timer { font-size: 1.2em; font-weight: bold; color: #d9534f; margin-bottom: 15px; text-align: right; }
+.answer-review {
+  margin-top: 15px;
+  font-size: 1em;
+  text-align: left;
+}
+.correct-answer { color: green; font-weight: bold; }
+.wrong-answer { color: red; font-weight: bold; }
+
+/* Input nome */
+#participantName {
+  width: 100%;
+  padding: 14px;
+  font-size: 1em;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+/* Timer */
+#timer {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #d9534f;
+  margin-bottom: 15px;
+}
+
+/* Overlay de carregamento */
 .loading-overlay {
   position: absolute;
   top:0; left:0;
@@ -69,11 +115,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2em;
+  font-size: 1.5em;
   color: #333;
-  border-radius: 12px;
+  border-radius: 20px;
   z-index: 1000;
   display: none;
+}
+
+/* Responsividade */
+@media (max-width: 400px) {
+  .question { font-size: 1.4em; }
+  .options button, .next-btn { font-size: 1em; padding: 14px; }
+  #participantName { padding: 12px; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -88,23 +141,10 @@ body {
 <script>
 const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
 
-// Perguntas de exemplo
 let questions = [
-  {
-    question: "Qual é a capital do Brasil?",
-    options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"],
-    answer: 2
-  },
-  {
-    question: "Qual é 2 + 2?",
-    options: ["3", "4", "5", "6"],
-    answer: 2
-  },
-  {
-    question: "Qual é a cor do céu em um dia limpo?",
-    options: ["Azul", "Verde", "Vermelho", "Amarelo"],
-    answer: 1
-  }
+  { question: "Qual é a capital do Brasil?", options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"], answer: 2 },
+  { question: "Qual é 2 + 2?", options: ["3", "4", "5", "6"], answer: 2 },
+  { question: "Qual é a cor do céu em um dia limpo?", options: ["Azul", "Verde", "Vermelho", "Amarelo"], answer: 1 }
 ];
 
 let current = 0;
@@ -129,9 +169,7 @@ function startTimer() {
   }, 1000);
 }
 
-function formatBoldQuotes(text) {
-  return text.replace(/"(.*?)"/g, '<b>"$1"</b>');
-}
+function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
 
 function showQuestion() {
   answered = false;
@@ -139,9 +177,7 @@ function showQuestion() {
   const formattedQuestion = formatBoldQuotes(q.question);
   let html = `<div id="timer">⏳ Tempo: 30s</div>`;
   html += `<div class="question">${current+1}. ${formattedQuestion}</div><div class="options">`;
-  q.options.forEach((opt, i) => {
-    html += `<button onclick="clickOption(${i+1})">${opt}</button>`;
-  });
+  q.options.forEach((opt, i) => { html += `<button onclick="clickOption(${i+1})">${opt}</button>`; });
   html += '</div>';
   document.getElementById('quiz').innerHTML = html;
   startTimer();
@@ -153,7 +189,7 @@ function clickOption(selected) {
   setTimeout(() => {
     loading.style.display = 'none';
     checkAnswer(selected);
-  }, 500); // simula carregamento
+  }, 500);
 }
 
 function checkAnswer(selected) {
@@ -168,10 +204,7 @@ function checkAnswer(selected) {
     b.disabled = true;
   });
   userAnswers.push(selected);
-  if (selected == correct) {
-    score++;
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-  }
+  if (selected == correct) { score++; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
   setTimeout(nextQuestion, 800);
 }
 
@@ -197,7 +230,7 @@ function showResult() {
   </div>`;
   document.getElementById('quiz').innerHTML = html;
 
-  const winner = (score >= 2) ? true : false; // mínimo 2 acertos para ganhar
+  const winner = (score >= 2) ? true : false;
   const resultDiv = document.createElement('div');
   resultDiv.id = 'winner';
   if(winner){
@@ -210,7 +243,6 @@ function showResult() {
   }
 }
 
-// Inicia o quiz
 showQuestion();
 </script>
 
