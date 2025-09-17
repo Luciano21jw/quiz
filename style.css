@@ -1,0 +1,95 @@
+/* Estilos gerais */
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  margin: 0;
+  padding: 20px;
+  font-size: 18px;
+}
+
+/* Container do quiz */
+.quiz-container {
+  max-width: 600px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+/* Pergunta */
+.question {
+  font-size: 1.6em;
+  margin-bottom: 15px;
+}
+
+/* Opções */
+.options button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #e0e0e0;
+  border: none;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+/* Respostas corretas e incorretas */
+.options button.correct { 
+  background: #4CAF50 !important; 
+  color: white; 
+}
+.options button.incorrect { 
+  background: #F44336 !important; 
+  color: white; 
+}
+
+/* Botão próximo / enviar */
+.next-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #2196F3;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+/* Resultado e revisão */
+.result {
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 20px;
+}
+.answer-review div { 
+  margin-bottom: 12px; 
+}
+.correct-answer { 
+  color: green; 
+}
+.wrong-answer { 
+  color: red; 
+}
+
+/* Input do nome */
+#participantName {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* Responsividade para celular */
+@media (max-width: 500px) {
+  .question { font-size: 1.4em; }
+  .options button { font-size: 0.9em; padding: 10px; }
+  .next-btn { font-size: 0.9em; padding: 8px 16px; }
+}
