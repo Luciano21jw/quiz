@@ -1,118 +1,224 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Interativo</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Quiz Interativo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  margin: 0;
+  padding: 20px;
+  font-size: 18px;
+}
+.quiz-container {
+  max-width: 95%;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+  box-sizing: border-box;
+}
+.question {
+  font-size: 1.8em;
+  margin-bottom: 15px;
+  word-wrap: break-word;
+}
+.options button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #e0e0e0;
+  border: none;
+  margin: 8px 0;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background 0.3s;
+  word-wrap: break-word;
+}
+.options button.correct { background: #4CAF50 !important; color: white; }
+.options button.incorrect { background: #F44336 !important; color: white; }
+.next-btn {
+  margin-top: 15px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #2196F3;
+  color: white;
+  cursor: pointer;
+  font-size: 1.1em;
+  width: 100%;
+}
+.result {
+  font-size: 1.4em;
+  text-align: center;
+  margin-top: 20px;
+}
+.answer-review { margin-top: 15px; font-size: 1em; }
+.answer-review div { margin-bottom: 12px; }
+.correct-answer { color: green; }
+.wrong-answer { color: red; }
+#winner { font-size: 1.5em; text-align: center; margin-top: 15px; word-wrap: break-word; }
+#participantName {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+#timer {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #d9534f;
+  margin-bottom: 10px;
+  text-align: right;
+}
+.loading-overlay {
+  position: absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5em;
+  color: #333;
+  border-radius: 12px;
+  z-index: 1000;
+  display: none;
+}
+@media (max-width: 600px) {
+  body { font-size: 16px; padding: 15px; }
+  .question { font-size: 1.5em; }
+  .options button { font-size: 1em; padding: 12px; }
+  .next-btn { font-size: 1em; padding: 12px; }
+  .result { font-size: 1.2em; }
+  .answer-review { font-size: 0.95em; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <div class="quiz-container">
-    <h1>Quiz Bíblico</h1>
-    <div id="quiz"></div>
-    <button id="submit">Enviar Respostas</button>
-    <div id="results"></div>
-  </div>
 
-  <script>
-    const quizQuestions = [
-      {
-        question: "Quem construiu a arca?",
-        answers: {
-          a: "Moisés",
-          b: "Noé",
-          c: "Abraão"
-        },
-        correctAnswer: "b"
-      },
-      {
-        question: "Qual foi o primeiro homem criado por Deus?",
-        answers: {
-          a: "Adão",
-          b: "Davi",
-          c: "Pedro"
-        },
-        correctAnswer: "a"
-      }
-    ];
+<div class="quiz-container">
+  <div id="quiz"></div>
+  <div id="loading" class="loading-overlay">Carregando próxima questão...</div>
+</div>
 
-    function buildQuiz() {
-      const output = [];
-      quizQuestions.forEach((currentQuestion, questionNumber) => {
-        const answers = [];
-        for (letter in currentQuestion.answers) {
-          answers.push(
-            `<label>
-              <input type="radio" name="question${questionNumber}" value="${letter}">
-              ${letter}: ${currentQuestion.answers[letter]}
-            </label>`
-          );
-        }
-        output.push(
-          `<div class="question"> ${currentQuestion.question} </div>
-          <div class="answers"> ${answers.join("")} </div>`
-        );
-      });
-      document.getElementById("quiz").innerHTML = output.join("");
+<script>
+const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
+
+let questions = [
+  { question: "Qual é a capital do Brasil?", options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"], answer: 2 },
+  { question: "Qual é 2 + 2?", options: ["3", "4", "5", "6"], answer: 2 },
+  { question: "Qual é a cor do céu em um dia limpo?", options: ["Azul", "Verde", "Vermelho", "Amarelo"], answer: 1 }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+let userAnswers = [];
+let timer;
+let timeLeft = 30;
+
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 30;
+  document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      userAnswers.push(0);
+      nextQuestion();
     }
+  }, 1000);
+}
 
-    function showResults() {
-      const answerContainers = quizContainer.querySelectorAll(".answers");
-      let numCorrect = 0;
-      const answersArray = [];
+function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
 
-      quizQuestions.forEach((currentQuestion, questionNumber) => {
-        const answerContainer = answerContainers[questionNumber];
-        const selector = `input[name=question${questionNumber}]:checked`;
-        const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+function showQuestion() {
+  answered = false;
+  const q = questions[current];
+  const formattedQuestion = formatBoldQuotes(q.question);
+  let html = `<div id="timer">⏳ Tempo: 30s</div>`;
+  html += `<div class="question">${current+1}. ${formattedQuestion}</div><div class="options">`;
+  q.options.forEach((opt, i) => { html += `<button onclick="clickOption(${i+1})">${opt}</button>`; });
+  html += '</div>';
+  document.getElementById('quiz').innerHTML = html;
+  startTimer();
+}
 
-        if (userAnswer === currentQuestion.correctAnswer) {
-          numCorrect++;
-        }
+function clickOption(selected) {
+  const loading = document.getElementById('loading');
+  loading.style.display = 'flex';
+  setTimeout(() => {
+    loading.style.display = 'none';
+    checkAnswer(selected);
+  }, 500);
+}
 
-        answersArray.push({
-          question: currentQuestion.question,
-          selected: userAnswer || "Não respondeu",
-          correct: currentQuestion.correctAnswer
-        });
-      });
+function checkAnswer(selected) {
+  if(answered) return;
+  answered = true;
+  clearInterval(timer);
+  const correct = questions[current].answer;
+  const buttons = document.querySelectorAll('.options button');
+  buttons.forEach((b, i) => {
+    if (i+1 == correct) b.classList.add('correct');
+    else if (i+1 == selected) b.classList.add('incorrect');
+    b.disabled = true;
+  });
+  userAnswers.push(selected);
+  if (selected == correct) { score++; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+  setTimeout(nextQuestion, 800);
+}
 
-      resultsContainer.innerHTML = `${numCorrect} de ${quizQuestions.length} corretas`;
+function nextQuestion() {
+  current++;
+  if(current < questions.length) showQuestion();
+  else showResult();
+}
 
-      // Pergunta o nome antes de enviar
-      const name = prompt("Digite seu nome:");
+function showResult() {
+  let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score} / ${questions.length}</div>`;
+  html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
+  questions.forEach((q,i)=>{
+    const userAns = q.options[userAnswers[i]-1] || 'Não respondida';
+    const correctAns = q.options[q.answer-1];
+    const formattedQuestion = formatBoldQuotes(q.question);
+    html += `<div><strong>Pergunta ${i+1}:</strong> ${formattedQuestion}<br> Sua resposta: <span class="${userAnswers[i]===q.answer ? 'correct-answer' : 'wrong-answer'}">${userAns}</span><br> Resposta correta: <span class="correct-answer">${correctAns}</span></div>`;
+  });
+  html += `</div>`;
+  html += `<div style="text-align:center; margin-top:20px;">
+    <input type="text" id="participantName" placeholder="Digite seu nome"><br>
+    <button class="next-btn" onclick="alert('Respostas enviadas!')">ENVIAR RESPOSTAS</button>
+  </div>`;
+  document.getElementById('quiz').innerHTML = html;
 
-      const payload = {
-        name: name,
-        score: numCorrect,
-        total: quizQuestions.length,
-        answers: answersArray
-      };
+  const winner = (score >= 2) ? true : false;
+  const resultDiv = document.createElement('div');
+  resultDiv.id = 'winner';
+  if(winner){
+    resultDiv.innerHTML = `🏆 Parabéns, você ganhou!<br>Visite: <a href="${shopeeLink}" target="_blank">Shopee</a>`;
+    document.getElementById('quiz').appendChild(resultDiv);
+    confetti({ particleCount: 200, spread: 100 });
+  } else {
+    resultDiv.innerHTML = `😢 Continue tentando!`;
+    document.getElementById('quiz').appendChild(resultDiv);
+  }
+}
 
-      fetch("https://script.google.com/macros/s/AKfycbyiPSe_-TnyHWy0LXtJSde3RzW2cosX6UiILq6TfDDiFTg_xTVLqKPXvtyMVQdG3wSA/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "success") {
-          alert("Respostas enviadas com sucesso!");
-        } else {
-          alert("Erro ao enviar respostas: " + data.message);
-        }
-      })
-      .catch(err => {
-        alert("Erro ao enviar respostas: " + err);
-      });
-    }
+showQuestion();
+</script>
 
-    const quizContainer = document.getElementById("quiz");
-    const resultsContainer = document.getElementById("results");
-    const submitButton = document.getElementById("submit");
-
-    buildQuiz();
-    submitButton.addEventListener("click", showResults);
-  </script>
 </body>
 </html>
