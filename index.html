@@ -90,7 +90,6 @@ body {
 <script>
 const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
 
-// Perguntas do quiz
 let questions = [
   { question: "Qual é a capital do Brasil?", options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"], answer: 2 },
   { question: "Qual é 2 + 2?", options: ["3", "4", "5", "6"], answer: 2 },
@@ -104,7 +103,6 @@ let userAnswers = [];
 let timer;
 let timeLeft = 30;
 
-// Timer
 function startTimer() {
   clearInterval(timer);
   timeLeft = 30;
@@ -116,10 +114,8 @@ function startTimer() {
   }, 1000);
 }
 
-// Formatar texto com aspas em negrito
 function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
 
-// Mostrar pergunta
 function showQuestion() {
   answered = false;
   const q = questions[current];
@@ -132,14 +128,12 @@ function showQuestion() {
   startTimer();
 }
 
-// Clicar em opção
 function clickOption(selected) {
   const loading = document.getElementById('loading');
   loading.style.display = 'flex';
   setTimeout(() => { loading.style.display = 'none'; checkAnswer(selected); }, 500);
 }
 
-// Checar resposta
 function checkAnswer(selected) {
   if(answered) return;
   answered = true;
@@ -156,14 +150,12 @@ function checkAnswer(selected) {
   setTimeout(nextQuestion, 800);
 }
 
-// Próxima pergunta
 function nextQuestion() {
   current++;
   if(current < questions.length) showQuestion();
   else showResult();
 }
 
-// Mostrar resultado
 function showResult() {
   let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score} / ${questions.length}</div>`;
   html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
@@ -209,13 +201,14 @@ function sendResults() {
     }))
   };
 
-  fetch("https://script.google.com/macros/s/AKfycbwq3jBaHFNuZ8vL9nVxaGtHpM4b7MRseroDiv68lIGU9kdFJmUNjVOJhGLoZRz35AZX/exec", {
+  // 🔑 Substitua abaixo pela URL do seu Web App do Google Apps Script
+  fetch("https://script.google.com/macros/s/AKfycbyAnaB0M19mWUIrWQZdtNK7zHIzIEb27cEGN4cS927zOHeaPtZ3JtjSCEZIw_AKsH3a/exec", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
   .then(response => response.json())
-  .then(data => alert("Respostas enviadas!"))
+  .then(data => alert("Respostas enviadas com sucesso!"))
   .catch(err => alert("Erro ao enviar respostas: " + err));
 }
 
