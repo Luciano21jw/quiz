@@ -1,192 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Quiz Interativo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Interativo</title>
 <style>
 body {
   font-family: 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
   margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.quiz-container {
-  width: 95%;
-  max-width: 500px;
-  background: #fff;
-  color: #333;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
   padding: 20px;
-  box-sizing: border-box;
-  text-align: center;
+  font-size: 18px;
+}
+.quiz-container {
+  max-width: 600px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
   position: relative;
 }
-
-.question { font-size: 1.6em; margin-bottom: 20px; }
+.question {
+  font-size: 1.6em;
+  margin-bottom: 15px;
+}
 .options button {
   display: block;
   width: 100%;
-  margin: 10px 0;
-  padding: 16px;
-  font-size: 1.2em;
+  text-align: left;
+  background: #e0e0e0;
   border: none;
-  border-radius: 12px;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1em;
   cursor: pointer;
-  transition: all 0.3s;
-  background: #4a90e2;
-  color: #fff;
-  font-weight: bold;
+  transition: background 0.3s;
 }
-.options button:hover { transform: scale(1.05); }
-.options button.correct { background: #4CAF50 !important; }
-.options button.incorrect { background: #F44336 !important; }
-
+.options button.correct { background: #4CAF50 !important; color: white; }
+.options button.incorrect { background: #F44336 !important; color: white; }
 .next-btn {
   margin-top: 15px;
-  padding: 16px;
-  font-size: 1.2em;
-  width: 100%;
-  border-radius: 12px;
+  padding: 10px 20px;
   border: none;
-  background: #ff7f50;
-  color: #fff;
-  font-weight: bold;
+  border-radius: 8px;
+  background: #2196F3;
+  color: white;
   cursor: pointer;
+  font-size: 1em;
 }
-.next-btn:hover { background: #ff5722; transform: scale(1.03); }
-
-.result { font-size: 1.4em; margin-top: 20px; }
-.answer-review { margin-top: 15px; font-size: 1em; text-align: left; }
-.correct-answer { color: green; font-weight: bold; }
-.wrong-answer { color: red; font-weight: bold; }
-
-#participantName { width: 100%; padding: 14px; font-size: 1em; border-radius: 12px; border: 1px solid #ccc; margin-bottom: 15px; box-sizing: border-box; }
-#timer { font-size: 1.2em; font-weight: bold; color: #d9534f; margin-bottom: 15px; }
-.loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; font-size: 1.5em; color: #333; border-radius: 20px; z-index: 1000; display: none; }
-
-@media (max-width: 400px) {
+.result {
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 20px;
+}
+.answer-review div { margin-bottom: 12px; }
+.correct-answer { color: green; }
+.wrong-answer { color: red; }
+#participantName {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+@media (max-width: 500px) {
   .question { font-size: 1.4em; }
-  .options button, .next-btn { font-size: 1em; padding: 14px; }
-  #participantName { padding: 12px; }
+  .options button { font-size: 0.9em; padding: 10px; }
+  .next-btn { font-size: 0.9em; padding: 8px 16px; }
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
 <div class="quiz-container">
   <div id="quiz"></div>
-  <div id="loading" class="loading-overlay">Carregando próxima questão...</div>
 </div>
 
 <script>
-const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J";
-
+const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J"; // exemplo
 let questions = [
-  { question: "Qual é a capital do Brasil?", options: ["São Paulo", "Brasília", "Rio de Janeiro", "Salvador"], answer: 2 },
-  { question: "Qual é 2 + 2?", options: ["3", "4", "5", "6"], answer: 2 },
-  { question: "Qual é a cor do céu em um dia limpo?", options: ["Azul", "Verde", "Vermelho", "Amarelo"], answer: 1 }
+  { question: "Qual é a capital do Brasil?", options: ["São Paulo","Brasília","Rio de Janeiro"], answer: 2 },
+  { question: "2 + 2 = ?", options: ["3","4","5"], answer: 2 },
+  { question: "Qual é a cor do céu?", options: ["Azul","Verde","Vermelho"], answer: 1 }
 ];
-
 let current = 0;
 let score = 0;
 let answered = false;
 let userAnswers = [];
-let timer;
-let timeLeft = 30;
-
-function startTimer() {
-  clearInterval(timer);
-  timeLeft = 30;
-  document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
-  timer = setInterval(() => {
-    timeLeft--;
-    document.getElementById("timer").textContent = "⏳ Tempo: " + timeLeft + "s";
-    if (timeLeft <= 0) { clearInterval(timer); userAnswers.push(0); nextQuestion(); }
-  }, 1000);
-}
-
-function formatBoldQuotes(text) { return text.replace(/"(.*?)"/g, '<b>"$1"</b>'); }
 
 function showQuestion() {
   answered = false;
   const q = questions[current];
-  const formattedQuestion = formatBoldQuotes(q.question);
-  let html = `<div id="timer">⏳ Tempo: 30s</div>`;
-  html += `<div class="question">${current+1}. ${formattedQuestion}</div><div class="options">`;
-  q.options.forEach((opt, i) => { html += `<button onclick="clickOption(${i+1})">${opt}</button>`; });
+  let html = `<div class="question">${current+1}. ${q.question}</div><div class="options">`;
+  q.options.forEach((opt,i)=>{ html += `<button onclick="clickOption(${i+1})">${opt}</button>`; });
   html += '</div>';
   document.getElementById('quiz').innerHTML = html;
-  startTimer();
 }
 
-function clickOption(selected) {
-  const loading = document.getElementById('loading');
-  loading.style.display = 'flex';
-  setTimeout(() => { loading.style.display = 'none'; checkAnswer(selected); }, 500);
-}
-
-function checkAnswer(selected) {
+function clickOption(selected){
   if(answered) return;
   answered = true;
-  clearInterval(timer);
   const correct = questions[current].answer;
   const buttons = document.querySelectorAll('.options button');
-  buttons.forEach((b, i) => {
-    if (i+1 == correct) b.classList.add('correct');
-    else if (i+1 == selected) b.classList.add('incorrect');
+  buttons.forEach((b,i)=>{
+    if(i+1==correct) b.classList.add('correct');
+    else if(i+1==selected) b.classList.add('incorrect');
     b.disabled = true;
   });
   userAnswers.push(selected);
-  if (selected == correct) { score++; confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+  if(selected==correct) score++;
   setTimeout(nextQuestion, 800);
 }
 
-function nextQuestion() {
+function nextQuestion(){
   current++;
   if(current < questions.length) showQuestion();
   else showResult();
 }
 
-function showResult() {
-  let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score} / ${questions.length}</div>`;
+function showResult(){
+  let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score}/${questions.length}</div>`;
   html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
   questions.forEach((q,i)=>{
     const userAns = q.options[userAnswers[i]-1] || 'Não respondida';
     const correctAns = q.options[q.answer-1];
-    const formattedQuestion = formatBoldQuotes(q.question);
-    html += `<div><strong>Pergunta ${i+1}:</strong> ${formattedQuestion}<br> Sua resposta: <span class="${userAnswers[i]===q.answer ? 'correct-answer' : 'wrong-answer'}">${userAns}</span><br> Resposta correta: <span class="correct-answer">${correctAns}</span></div>`;
+    html += `<div><strong>Pergunta ${i+1}:</strong> ${q.question}<br>
+    Sua resposta: <span class="${userAnswers[i]===q.answer?'correct-answer':'wrong-answer'}">${userAns}</span><br>
+    Resposta correta: <span class="correct-answer">${correctAns}</span></div>`;
   });
   html += `</div>`;
-  html += `<div style="text-align:center; margin-top:20px;">
+  html += `<div style="text-align:center; margin-top:15px;">
     <input type="text" id="participantName" placeholder="Digite seu nome"><br>
     <button class="next-btn" onclick="sendResults()">ENVIAR RESPOSTAS</button>
   </div>`;
   document.getElementById('quiz').innerHTML = html;
-
-  const winner = (score >= 2);
-  const resultDiv = document.createElement('div');
-  resultDiv.id = 'winner';
-  if(winner){
-    resultDiv.innerHTML = `🏆 Parabéns, você ganhou!<br>Visite: <a href="${shopeeLink}" target="_blank">Shopee</a>`;
-    document.getElementById('quiz').appendChild(resultDiv);
-    confetti({ particleCount: 200, spread: 100 });
-  } else {
-    resultDiv.innerHTML = `😢 Continue tentando!`;
-    document.getElementById('quiz').appendChild(resultDiv);
-  }
 }
 
-// Enviar respostas via Google Apps Script
-function sendResults() {
+function sendResults(){
   const participantName = document.getElementById('participantName').value.trim();
   if(!participantName){ alert("Digite seu nome antes de enviar."); return; }
 
@@ -201,20 +153,18 @@ function sendResults() {
     }))
   };
 
-  // 🔑 Substitua abaixo pela URL do seu Web App do Google Apps Script
-  fetch("https://script.google.com/macros/s/AKfycbyAnaB0M19mWUIrWQZdtNK7zHIzIEb27cEGN4cS927zOHeaPtZ3JtjSCEZIw_AKsH3a/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbyAnaB0M19mWUIrWQZdtNK7zHIzIEb27cEGN4cS927zOHeaPtZ3JtjSCEZIw_AKsH3a/exec", { // coloque a URL do Apps Script aqui
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    mode: "no-cors"
   })
-  .then(response => response.json())
-  .then(data => alert("Respostas enviadas com sucesso!"))
-  .catch(err => alert("Erro ao enviar respostas: " + err));
+  .then(()=>alert("Respostas enviadas com sucesso!"))
+  .catch(err=>alert("Erro ao enviar respostas: "+err));
 }
 
-// Iniciar quiz
 showQuestion();
 </script>
-
 </body>
 </html>
+
