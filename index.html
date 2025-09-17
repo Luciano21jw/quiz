@@ -1,170 +1,114 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz Interativo</title>
-<style>
-body {
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background: #f0f2f5;
-  margin: 0;
-  padding: 20px;
-  font-size: 18px;
-}
-.quiz-container {
-  max-width: 600px;
-  margin: auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  position: relative;
-}
-.question {
-  font-size: 1.6em;
-  margin-bottom: 15px;
-}
-.options button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: #e0e0e0;
-  border: none;
-  margin: 8px 0;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-.options button.correct { background: #4CAF50 !important; color: white; }
-.options button.incorrect { background: #F44336 !important; color: white; }
-.next-btn {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background: #2196F3;
-  color: white;
-  cursor: pointer;
-  font-size: 1em;
-}
-.result {
-  font-size: 1.2em;
-  text-align: center;
-  margin-top: 20px;
-}
-.answer-review div { margin-bottom: 12px; }
-.correct-answer { color: green; }
-.wrong-answer { color: red; }
-#participantName {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  font-size: 1em;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-@media (max-width: 500px) {
-  .question { font-size: 1.4em; }
-  .options button { font-size: 0.9em; padding: 10px; }
-  .next-btn { font-size: 0.9em; padding: 8px 16px; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Interativo</title>
+  <!-- Link para o CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="quiz-container">
-  <div id="quiz"></div>
-</div>
+  <div class="quiz-container">
+    <div id="quiz"></div>
+  </div>
 
-<script>
-const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J"; // exemplo
-let questions = [
-  { question: "Qual é a capital do Brasil?", options: ["São Paulo","Brasília","Rio de Janeiro"], answer: 2 },
-  { question: "2 + 2 = ?", options: ["3","4","5"], answer: 2 },
-  { question: "Qual é a cor do céu?", options: ["Azul","Verde","Vermelho"], answer: 1 }
-];
-let current = 0;
-let score = 0;
-let answered = false;
-let userAnswers = [];
+  <script>
+    const shopeeLink = "https://s.shopee.com.br/9AEcKNbn4J"; 
 
-function showQuestion() {
-  answered = false;
-  const q = questions[current];
-  let html = `<div class="question">${current+1}. ${q.question}</div><div class="options">`;
-  q.options.forEach((opt,i)=>{ html += `<button onclick="clickOption(${i+1})">${opt}</button>`; });
-  html += '</div>';
-  document.getElementById('quiz').innerHTML = html;
-}
+    // Perguntas do quiz
+    let questions = [
+      { question: "Qual é a capital do Brasil?", options: ["São Paulo","Brasília","Rio de Janeiro"], answer: 2 },
+      { question: "2 + 2 = ?", options: ["3","4","5"], answer: 2 },
+      { question: "Qual é a cor do céu?", options: ["Azul","Verde","Vermelho"], answer: 1 }
+    ];
 
-function clickOption(selected){
-  if(answered) return;
-  answered = true;
-  const correct = questions[current].answer;
-  const buttons = document.querySelectorAll('.options button');
-  buttons.forEach((b,i)=>{
-    if(i+1==correct) b.classList.add('correct');
-    else if(i+1==selected) b.classList.add('incorrect');
-    b.disabled = true;
-  });
-  userAnswers.push(selected);
-  if(selected==correct) score++;
-  setTimeout(nextQuestion, 800);
-}
+    let current = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = [];
 
-function nextQuestion(){
-  current++;
-  if(current < questions.length) showQuestion();
-  else showResult();
-}
+    // Mostra a pergunta atual
+    function showQuestion() {
+      answered = false;
+      const q = questions[current];
+      let html = `<div class="question">${current+1}. ${q.question}</div><div class="options">`;
+      q.options.forEach((opt,i)=>{
+        html += `<button onclick="clickOption(${i+1})">${opt}</button>`;
+      });
+      html += '</div>';
+      document.getElementById('quiz').innerHTML = html;
+    }
 
-function showResult(){
-  let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score}/${questions.length}</div>`;
-  html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
-  questions.forEach((q,i)=>{
-    const userAns = q.options[userAnswers[i]-1] || 'Não respondida';
-    const correctAns = q.options[q.answer-1];
-    html += `<div><strong>Pergunta ${i+1}:</strong> ${q.question}<br>
-    Sua resposta: <span class="${userAnswers[i]===q.answer?'correct-answer':'wrong-answer'}">${userAns}</span><br>
-    Resposta correta: <span class="correct-answer">${correctAns}</span></div>`;
-  });
-  html += `</div>`;
-  html += `<div style="text-align:center; margin-top:15px;">
-    <input type="text" id="participantName" placeholder="Digite seu nome"><br>
-    <button class="next-btn" onclick="sendResults()">ENVIAR RESPOSTAS</button>
-  </div>`;
-  document.getElementById('quiz').innerHTML = html;
-}
+    // Quando o usuário clica em uma opção
+    function clickOption(selected){
+      if(answered) return;
+      answered = true;
+      const correct = questions[current].answer;
+      const buttons = document.querySelectorAll('.options button');
+      buttons.forEach((b,i)=>{
+        if(i+1==correct) b.classList.add('correct');
+        else if(i+1==selected) b.classList.add('incorrect');
+        b.disabled = true;
+      });
+      userAnswers.push(selected);
+      if(selected==correct) score++;
+      setTimeout(nextQuestion, 800);
+    }
 
-function sendResults(){
-  const participantName = document.getElementById('participantName').value.trim();
-  if(!participantName){ alert("Digite seu nome antes de enviar."); return; }
+    // Passa para a próxima pergunta ou mostra o resultado
+    function nextQuestion(){
+      current++;
+      if(current < questions.length) showQuestion();
+      else showResult();
+    }
 
-  const payload = {
-    name: participantName,
-    score: score,
-    total: questions.length,
-    answers: userAnswers.map((a,i)=>({
-      question: questions[i].question,
-      selected: questions[i].options[a-1],
-      correct: questions[i].options[questions[i].answer-1]
-    }))
-  };
+    // Mostra o resultado final
+    function showResult(){
+      let html = `<div class="result">Quiz Concluído!<br>Sua Pontuação: ${score}/${questions.length}</div>`;
+      html += `<div class="answer-review"><h3>Revisão das Respostas:</h3>`;
+      questions.forEach((q,i)=>{
+        const userAns = q.options[userAnswers[i]-1] || 'Não respondida';
+        const correctAns = q.options[q.answer-1];
+        html += `<div><strong>Pergunta ${i+1}:</strong> ${q.question}<br>
+        Sua resposta: <span class="${userAnswers[i]===q.answer?'correct-answer':'wrong-answer'}">${userAns}</span><br>
+        Resposta correta: <span class="correct-answer">${correctAns}</span></div>`;
+      });
+      html += `</div>`;
+      html += `<div style="text-align:center; margin-top:15px;">
+        <input type="text" id="participantName" placeholder="Digite seu nome"><br>
+        <button class="next-btn" onclick="sendResults()">ENVIAR RESPOSTAS</button>
+      </div>`;
+      document.getElementById('quiz').innerHTML = html;
+    }
 
-  fetch("https://script.google.com/macros/s/AKfycbzQFtO_g8JsSfljBRUw_rJfyZ3TMDtW45SjRKuW6cVCsYIF0dADQKugcLZPRJO4Rugq/exec", { // coloque a URL do Apps Script aqui
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    mode: "no-cors"
-  })
-  .then(()=>alert("Respostas enviadas com sucesso!"))
-  .catch(err=>alert("Erro ao enviar respostas: "+err));
-}
+    // Envia respostas para o Apps Script
+    function sendResults(){
+      const participantName = document.getElementById('participantName').value.trim();
+      if(!participantName){ alert("Digite seu nome antes de enviar."); return; }
 
-showQuestion();
-</script>
+      const payload = {
+        name: participantName,
+        score: score,
+        total: questions.length,
+        answers: userAnswers.map((a,i)=>({
+          question: questions[i].question,
+          selected: questions[i].options[a-1],
+          correct: questions[i].options[questions[i].answer-1]
+        }))
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbzQFtO_g8JsSfljBRUw_rJfyZ3TMDtW45SjRKuW6cVCsYIF0dADQKugcLZPRJO4Rugq/exec", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        mode: "no-cors"
+      })
+      .then(()=>alert("Respostas enviadas com sucesso!"))
+      .catch(err=>alert("Erro ao enviar respostas: "+err));
+    }
+
+    // Inicia o quiz
+    showQuestion();
+  </script>
 </body>
 </html>
-
